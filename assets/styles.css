@@ -5,3 +5,7 @@
 .bordure,.intersection {
     fill: yellowgreen;
 }
+
+.intersection {
+    fill: violet;
+}
