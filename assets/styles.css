@@ -9,3 +9,11 @@
 .intersection {
     fill: violet;
 }
+
+.joueur1 {
+    fill: blue;
+}
+
+.joueur2 {
+    fill: red;
+}
