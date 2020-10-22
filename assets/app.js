@@ -16,6 +16,11 @@
 /* $("svg").html($("svg").html());
    Lorsque on implimente des formes dans un SVG à partir d'un script, il peut il avoir des problèmes d'actualisations. Pour palier à ce problème, il faut (à chaque implimentation) réactualiser le HTML. Attention au (`élement à l'intérieur d'un SVG`).on("click") car en faisant .html cela les supprime. */
 
+
+
+
+
+
 $(document).ready(function() {
         
 /* Dessin du plateau */
@@ -33,36 +38,68 @@ $(document).ready(function() {
 
 
 
-/* Déplacement des pions */
+/* Déplacement des pions -- En cours */
 
     let tourJoueur = 1;
 
     $("body").on("click", ".case", function(){
 
 
-        
-    if (valideDeplacement($(`#joueur${tourJoueur}`).data(`ligne`),$(`#joueur${tourJoueur}`).data(`colonne`),$(this).data(`ligne`),$(this).data(`colonne`)) == true) {
-        
+        /* on vérifie si le joueur peut se déplacer à la case cliqué */
+        if (valideDeplacementPion($(`#joueur${tourJoueur}`).data(`ligne`),$(`#joueur${tourJoueur}`).data(`colonne`),$(this).data(`ligne`),$(this).data(`colonne`)) == true) {
+            
+            /* On modifie les attributs cx et cy du pions pour le placer sur la case cliqué. On lui modifie aussi ces attributs data-ligne et data-colonne pour actualiser le positionnement */
 
-        $(`#joueur${tourJoueur}`).attr('cx', parseInt($(this).attr('x'))+widthCase/2);
-        $(`#joueur${tourJoueur}`).data(`ligne`, ($(this).data(`ligne`)));
-        
-        $(`#joueur${tourJoueur}`).attr('cy', parseInt($(this).attr('y'))+widthCase/2);
-        $(`#joueur${tourJoueur}`).data(`colonne`, ($(this).data(`colonne`)));
+            $(`#joueur${tourJoueur}`).attr('cx', parseInt($(this).attr('x'))+widthCase/2);
+            $(`#joueur${tourJoueur}`).data(`ligne`, ($(this).data(`ligne`)));
+            
+            $(`#joueur${tourJoueur}`).attr('cy', parseInt($(this).attr('y'))+widthCase/2);
+            $(`#joueur${tourJoueur}`).data(`colonne`, ($(this).data(`colonne`)));
 
 
-        
+            
 
-        /* changement de joueur */
-        if (tourJoueur == 1 ) {
-            tourJoueur++;
+            /* changement de joueur */
+            if (tourJoueur == 1 ) {
+                tourJoueur++;
+            } else {
+                tourJoueur = 1;
+            }
+
         } else {
-            tourJoueur = 1;
+            alert(`Joueur ${tourJoueur} : Vous ne pouvez pas vous déplacer sur cette case !`)
         }
 
-    } else {
-        alert(`Joueur ${tourJoueur} : Vous ne pouvez pas vous déplacer sur cette case !`)
-    }
+    
+
+    });
+
+
+
+/* Placement des batonnets -- En cours */
+    $("body").on("click", ".bordure", function(){
+
+
+        if (validePlacementBatonnet($(this).data(`contenu`)) == true) {
+
+            /* on place le batonnet sur la case cliquée */
+            $(this).addClass(`batonnet`);
+            $(this).data(`contenu`, `plein`);
+            
+            /* on prolonge le batonnet jusqu'à une bordure +1 */
+            placementBatonnetAdjacent($(this).data(`ligne`),$(this).data(`colonne`),$(this).attr(`width`));
+
+
+            /* changement de joueur */
+            if (tourJoueur == 1 ) {
+                tourJoueur++;
+            } else {
+                tourJoueur = 1;
+            }
+        } else {
+            alert(`Joueur ${tourJoueur} : Il y a déjà un batonnet à cet endroit !`)
+        }
+
 
     
 
@@ -96,15 +133,12 @@ $(document).ready(function() {
 
 
 
-
-
-
-    /* FONCTIONS */
+/* FONCTIONS */
 
 
     /* Générateur de rectangle SVG selon les coordonnées et les dimensions souhaitées. Elle comprend aussi 2 données : la class CSS et les coordonnées x,y dans la propriété data */
     function generateurRect (classCss,numLigne,numColonne,positionX,positionY,largeur,hauteur) {
-        let rect = `<rect class="${classCss}" data-ligne="${numLigne}" data-colonne="${numColonne}" x="${positionX}" y="${positionY}" width="${largeur}" height="${hauteur}"/>`;
+        let rect = `<rect class="${classCss}" data-ligne="${numLigne}" data-colonne="${numColonne}" data-contenu="vide" x="${positionX}" y="${positionY}" width="${largeur}" height="${hauteur}"/>`;
 
         return rect;
     }
@@ -160,13 +194,13 @@ $(document).ready(function() {
 
 
 
-    function valideDeplacement (ligneDepart,colonneDepart,ligneArrivee,colonneArrivee) {
 
-        /* console.log("ligneDepart : "+ligneDepart);
-        console.log("ligneArrivee : "+ligneArrivee);
 
-        console.log("colonneDepart : "+colonneDepart);
-        console.log("colonneArrivee : "+colonneArrivee); */
+
+
+
+    function valideDeplacementPion (ligneDepart,colonneDepart,ligneArrivee,colonneArrivee) {
+
         
         let verifLigne = Boolean , verifColonne = Boolean
         
@@ -178,6 +212,13 @@ $(document).ready(function() {
             verifLigne = (ligneDepart == ligneArrivee - 1) || (ligneDepart == ligneArrivee + 1);
             verifColonne = colonneDepart == colonneArrivee;
         }
+
+
+        /* Ajouter la contrainte des batonnets entre les cases */
+
+
+        /* Ajouter la possibilité de passer par dessus un joueur */
+
 
         if (verifLigne == true && verifColonne == true) {
             /* console.log(true); */
@@ -191,7 +232,41 @@ $(document).ready(function() {
     }
 
 
+
+    function validePlacementBatonnet(contenu) {
+        if (contenu == "vide") {
+            return true
+        } else {
+            return false
+        }
+    }
+
     
+
+
+
+
+
+    
+
+
+    function placementBatonnetAdjacent(ligneSelect,colonneSelect,widthSelect) {
+
+
+        /* si la bordure cliquée est verticale alors on ajoute le batonnet sur la bordure +1 */
+        if (widthSelect == widthBordure) {
+            $(`.bordure[data-ligne=${ligneSelect+1}] + .bordure[width=${widthSelect}] + .bordure[data-colonne=${colonneSelect}]`).addClass(`batonnet`);
+            $(`.bordure[data-ligne=${ligneSelect+1}] + .bordure[width=${widthSelect}] + .bordure[data-colonne=${colonneSelect}]`).data(`contenu`, `plein`);
+        } else {
+            $(`.bordure[data-ligne=${ligneSelect}] + .bordure[width=${widthSelect}] + .bordure[data-colonne=${colonneSelect+1}]`).addClass(`batonnet`);
+            $(`.bordure[data-ligne=${ligneSelect}] + .bordure[width=${widthSelect}] + .bordure[data-colonne=${colonneSelect+1}]`).data(`contenu`, `plein`);
+        }
+
+        /* On ajoute la bordure sur l'intesection entre la bordure cliquée et la bordure +1 */
+        $(`.intersection[data-ligne=${ligneSelect}] + .intersection[data-colonne=${colonneSelect}]`).addClass(`batonnet`);
+        $(`.intersection[data-ligne=${ligneSelect}] + .intersection[data-colonne=${colonneSelect}]`).data(`contenu`, `plein`);
+
+    }
 
 
 });

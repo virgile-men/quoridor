@@ -1,13 +1,25 @@
 .case {
-    fill: aqua;
+    fill: rgb(255, 255, 255);
 }
 
-.bordure,.intersection {
-    fill: yellowgreen;
+.case:hover {
+    fill: rgba(140, 140, 140, 0.593);
+}
+
+.bordure {
+    fill: rgb(137, 137, 137);
+}
+
+.bordure:hover {
+    fill: rgba(0, 0, 0, 0.833);
 }
 
 .intersection {
-    fill: violet;
+    fill: rgb(137, 137, 137);
+}
+
+.batonnet {
+    fill: rgb(0, 0, 0)
 }
 
 .joueur1 {
