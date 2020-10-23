@@ -32,7 +32,7 @@ $(document).ready(function() {
     /* console.log(`Plateau de ${widthCase}px par case / ${widthBordure}px par bordure`); */
 
     /* Génération du plateau en SVG */
-    $("div").append(`<svg height="${widthCase*9+widthBordure*8}" width="${widthCase*9+widthBordure*8}">`+generateurPlateau(widthCase,widthBordure)+`</svg>`);
+    $("div").append(`<svg class="plateau" height="${widthCase*9+widthBordure*8}" width="${widthCase*9+widthBordure*8}">`+generateurPlateau(widthCase,widthBordure)+`</svg>`);
 
 
 
@@ -48,6 +48,12 @@ $(document).ready(function() {
         /* on vérifie si le joueur peut se déplacer à la case cliqué */
         if (valideDeplacementPion($(`#joueur${tourJoueur}`).data(`ligne`),$(`#joueur${tourJoueur}`).data(`colonne`),$(this).data(`ligne`),$(this).data(`colonne`)) == true) {
             
+            /* on modifie la data-contenu "vide" en "plein" si un point s'y trouve. On change également la data-contenu "plein" en vide pour la case de départ */
+            $(this).data(`contenu`, "plein");
+
+            $(`.case[data-ligne=${$(`#joueur${tourJoueur}`).data(`ligne`)}] + .case[data-colonne=${$(`#joueur${tourJoueur}`).data(`colonne`)}]`).data(`contenu`, "vide");
+            
+
             /* On modifie les attributs cx et cy du pions pour le placer sur la case cliqué. On lui modifie aussi ces attributs data-ligne et data-colonne pour actualiser le positionnement */
 
             $(`#joueur${tourJoueur}`).attr('cx', parseInt($(this).attr('x'))+widthCase/2);
@@ -66,6 +72,7 @@ $(document).ready(function() {
                 tourJoueur = 1;
             }
 
+
         } else {
             alert(`Joueur ${tourJoueur} : Vous ne pouvez pas vous déplacer sur cette case !`)
         }
@@ -80,7 +87,7 @@ $(document).ready(function() {
     $("body").on("click", ".bordure", function(){
 
 
-        if (validePlacementBatonnet($(this).data(`contenu`)) == true) {
+        if (validePlacementBatonnet($(this).data(`contenu`),$(this).data(`ligne`),$(this).data(`colonne`),$(this).data(`ligne`),$(this).data(`colonne`)) == true) {
 
             /* on place le batonnet sur la case cliquée */
             $(this).addClass(`batonnet`);
@@ -201,16 +208,18 @@ $(document).ready(function() {
 
     function valideDeplacementPion (ligneDepart,colonneDepart,ligneArrivee,colonneArrivee) {
 
-        
         let verifLigne = Boolean , verifColonne = Boolean
         
         verifLigne = ligneDepart == ligneArrivee;
+
         
-        if (verifLigne == true) {
-            verifColonne = (colonneDepart == colonneArrivee - 1) || (colonneDepart == colonneArrivee + 1);
-        } else {
-            verifLigne = (ligneDepart == ligneArrivee - 1) || (ligneDepart == ligneArrivee + 1);
-            verifColonne = colonneDepart == colonneArrivee;
+        if ($(`.case[data-ligne=${ligneArrivee}] + .case[data-colonne=${colonneArrivee}]`).data(`contenu`) == "vide") {
+            if (verifLigne == true) {
+                verifColonne = (colonneDepart == colonneArrivee - 1) || (colonneDepart == colonneArrivee + 1);
+            } else {
+                verifLigne = (ligneDepart == ligneArrivee - 1) || (ligneDepart == ligneArrivee + 1);
+                verifColonne = colonneDepart == colonneArrivee;
+            }
         }
 
 
@@ -221,10 +230,8 @@ $(document).ready(function() {
 
 
         if (verifLigne == true && verifColonne == true) {
-            /* console.log(true); */
             return true;
         } else {
-            /* console.log(false); */
             return false;
         }
 
@@ -233,9 +240,13 @@ $(document).ready(function() {
 
 
 
-    function validePlacementBatonnet(contenu) {
+    function validePlacementBatonnet(contenu,ligneSelect,colonneSelect) {
+        /* on vérifie s'il n'y a pas de batonnet sur la bordure cliqué */
         if (contenu == "vide") {
-            return true
+            /* on vérifie s'il n'y a pas de batonnet sur l'intersection entre les 2 bordures */
+            if ($(`.intersection[data-ligne=${ligneSelect}] + .intersection[data-colonne=${colonneSelect}]`).data(`contenu`) == "vide") {
+                return true;
+            }
         } else {
             return false
         }
