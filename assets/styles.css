@@ -1,31 +1,36 @@
-.case {
-    fill: rgb(255, 255, 255);
-}
+.case { fill: #ffffff; }
 
-.case:hover {
-    fill: rgba(140, 140, 140, 0.593);
-}
+.case:hover { fill: #8c8c8c97; }
 
-.bordure {
-    fill: rgb(137, 137, 137);
-}
+.bordure { fill: #898989 }
 
-.bordure:hover {
-    fill: rgba(0, 0, 0, 0.833);
-}
+.bordure:hover { fill: #000000d4; }
 
-.intersection {
-    fill: rgb(137, 137, 137);
-}
+.verticale:hover { height: 110px; }
 
-.batonnet {
-    fill: rgb(0, 0, 0)
-}
+.horizontale:hover { width: 110px; }
 
-.joueur1 {
-    fill: blue;
-}
+.intersection { fill: #898989 }
 
-.joueur2 {
-    fill: red;
+.batonnet { fill: #000000 }
+
+.joueur1 { fill: #0000ff; }
+
+.joueur2 { fill: #ff0000; }
+
+.fond-stockage { fill: #777777 }
+
+.fond-stockage-batonnet { fill: #c8c8c8 }
+
+.teeest { fill: #950000 }
+
+.container {
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-template-rows: 110fr 530px 110fr;
+    gap: 20px 0px;
+    grid-template-areas:
+      "."
+      "."
+      ".";
 }
